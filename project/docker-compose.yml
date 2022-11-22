@@ -13,6 +13,27 @@ services:
       mode: replicated
       replicas: 1
 
+  mongo:
+    image: 'mongo:5.0.13-focal'
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: logs
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - /data/db:/data/db
+  #      - ./db-data/mongo/:/data/db
+
+  logger-service:
+    build:
+      context: ./../logger-service
+      dockerfile: ./../logger-service/logger-service.dockerfile
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+
   postgres:
     image: 'postgres:15.0'
     ports:

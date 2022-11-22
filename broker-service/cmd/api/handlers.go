@@ -17,6 +17,12 @@ type AuthPayload struct {
 type RequestPayload struct {
 	Action string      `json:"action"`
 	Auth   AuthPayload `json:"auth,omitempty"`
+	Log    LogPayload  `json:"log,omitempty"`
+}
+
+type LogPayload struct {
+	Name string `json:"name"`
+	Data string `json:"data"`
 }
 
 var tools common.Tools
@@ -47,19 +53,57 @@ func (app *Config) HandleSubmission(w http.ResponseWriter, r *http.Request) {
 	switch requestPayload.Action {
 	case "auth":
 		app.authenticate(w, requestPayload.Auth)
-		break
+	case "log":
+		app.logItem(w, requestPayload.Log)
 	default:
 		_ = tools.ErrorJSON(w, errors.New("unknown action"))
 	}
 }
 
-func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
+func (app *Config) logItem(w http.ResponseWriter, entry LogPayload) {
+	jsonData, _ := json.Marshal(entry)
 
+	logServiceURL := "http://logger-service/log"
+
+	request, err := http.NewRequest("POST", logServiceURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		_ = tools.ErrorJSON(w, err)
+		return
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+
+	response, err := client.Do(request)
+	if err != nil {
+		_ = tools.ErrorJSON(w, err)
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusAccepted {
+		_ = tools.ErrorJSON(w, err)
+		return
+	}
+
+	payload := common.JSONResponse{
+		Error:   false,
+		Message: "logged",
+	}
+	err = tools.WriteJSON(w, http.StatusAccepted, payload)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 	// json to send to the auth microservice
 	jsonData, _ := json.Marshal(a)
 
+	authServiceURL := "http://authentication-service/authenticate"
+
 	// call service
-	request, err := http.NewRequest("POST", "http://authentication-service/authenticate", bytes.NewBuffer(jsonData))
+	request, err := http.NewRequest("POST", authServiceURL, bytes.NewBuffer(jsonData))
 	log.Println(request)
 	if err != nil {
 		_ = tools.ErrorJSON(w, err)
