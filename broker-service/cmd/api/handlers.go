@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/loidinhm31/go-micro/common"
 	"log"
 	"net/http"
@@ -63,7 +64,7 @@ func (app *Config) HandleSubmission(w http.ResponseWriter, r *http.Request) {
 func (app *Config) logItem(w http.ResponseWriter, entry LogPayload) {
 	jsonData, _ := json.Marshal(entry)
 
-	logServiceURL := "http://logger-service/log"
+	logServiceURL := fmt.Sprintf("http://logger-service:%s/log", common.LoggerPort)
 
 	request, err := http.NewRequest("POST", logServiceURL, bytes.NewBuffer(jsonData))
 	if err != nil {
@@ -100,7 +101,7 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 	// json to send to the auth microservice
 	jsonData, _ := json.Marshal(a)
 
-	authServiceURL := "http://authentication-service/authenticate"
+	authServiceURL := fmt.Sprintf("http://authentication-service:%s/authenticate", common.AuthPort)
 
 	// call service
 	request, err := http.NewRequest("POST", authServiceURL, bytes.NewBuffer(jsonData))

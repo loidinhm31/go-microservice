@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/loidinhm31/go-micro/common"
 	"html/template"
 	"log"
 	"net/http"
@@ -14,8 +15,8 @@ func main() {
 		render(w, "test.page.gohtml")
 	})
 
-	fmt.Println("Starting front end service on port 80")
-	err := http.ListenAndServe(":8090", nil)
+	log.Printf("Starting front end service on port %s\n", common.FrontEndPort)
+	err := http.ListenAndServe(fmt.Sprintf(":%s", common.FrontEndPort), nil)
 	if err != nil {
 		log.Panic(err)
 	}

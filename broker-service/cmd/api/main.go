@@ -2,22 +2,21 @@ package main
 
 import (
 	"fmt"
+	"github.com/loidinhm31/go-micro/common"
 	"log"
 	"net/http"
 )
-
-const webPort = "80"
 
 type Config struct{}
 
 func main() {
 	app := Config{}
 
-	log.Printf("Starting broker service on port %s\n", webPort)
+	log.Printf("Starting broker service on port %s\n", common.BrokerPort)
 
 	// define http server
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%s", webPort),
+		Addr:    fmt.Sprintf(":%s", common.BrokerPort),
 		Handler: app.routes(),
 	}
 

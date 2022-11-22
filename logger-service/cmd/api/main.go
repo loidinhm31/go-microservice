@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/loidinhm31/go-micro/common"
 	"log"
 	"log-service/data"
 	"net/http"
@@ -13,7 +14,6 @@ import (
 )
 
 const (
-	webPort  = "80"
 	rpcPort  = "5001"
 	mongoURL = "mongodb://mongo:27017"
 	gRpcPort = "50001"
@@ -26,7 +26,7 @@ type Config struct {
 }
 
 func main() {
-	log.Printf("Starting logger service on port %s\n", webPort)
+	log.Printf("Starting logger service on port %s\n", common.LoggerPort)
 
 	// connect to mongo
 	mongoClient, err := connectToMongo()
@@ -52,7 +52,7 @@ func main() {
 
 	// define http server
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%s", webPort),
+		Addr:    fmt.Sprintf(":%s", common.LoggerPort),
 		Handler: app.routes(),
 	}
 

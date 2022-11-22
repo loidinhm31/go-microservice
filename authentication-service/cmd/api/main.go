@@ -4,6 +4,7 @@ import (
 	"authentication/data"
 	"database/sql"
 	"fmt"
+	"github.com/loidinhm31/go-micro/common"
 	"log"
 	"net/http"
 	"os"
@@ -14,8 +15,6 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-const webPort = "80"
-
 var counts int64
 
 type Config struct {
@@ -24,7 +23,7 @@ type Config struct {
 }
 
 func main() {
-	log.Printf("Starting authentication service on port %s\n", webPort)
+	log.Printf("Starting authentication service on port %s\n", common.AuthPort)
 
 	// Connect to DB
 	conn := connectToDB()
@@ -39,7 +38,7 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%s", webPort),
+		Addr:    fmt.Sprintf(":%s", common.AuthPort),
 		Handler: app.routes(),
 	}
 
