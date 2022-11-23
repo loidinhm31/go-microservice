@@ -15,15 +15,15 @@ type AuthPayload struct {
 	Password string `json:"password"`
 }
 
+type LogPayload struct {
+	Name string `json:"name"`
+	Data string `json:"data"`
+}
+
 type RequestPayload struct {
 	Action string      `json:"action"`
 	Auth   AuthPayload `json:"auth,omitempty"`
 	Log    LogPayload  `json:"log,omitempty"`
-}
-
-type LogPayload struct {
-	Name string `json:"name"`
-	Data string `json:"data"`
 }
 
 var tools common.Tools
@@ -31,7 +31,7 @@ var tools common.Tools
 func (app *Config) Broker(w http.ResponseWriter, r *http.Request) {
 	payload := common.JSONResponse{
 		Error:   false,
-		Message: "Hit the broker",
+		Message: "hit the broker",
 	}
 
 	var tools common.Tools
@@ -105,7 +105,6 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 
 	// call service
 	request, err := http.NewRequest("POST", authServiceURL, bytes.NewBuffer(jsonData))
-	log.Println(request)
 	if err != nil {
 		_ = tools.ErrorJSON(w, err)
 		return
@@ -113,7 +112,6 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 
 	client := &http.Client{}
 	response, err := client.Do(request)
-	log.Println(response)
 	if err != nil {
 		_ = tools.ErrorJSON(w, err)
 		return
@@ -146,7 +144,7 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 
 	payload := common.JSONResponse{
 		Error:   false,
-		Message: "Authenticated",
+		Message: "authenticated",
 		Data:    jsonFromService.Data,
 	}
 
