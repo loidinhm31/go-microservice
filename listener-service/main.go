@@ -1,22 +1,17 @@
 package main
 
 import (
-	"fmt"
-	"github.com/loidinhm31/go-micro/common"
-	amqp "github.com/rabbitmq/amqp091-go"
+	"listener/event"
 	"log"
 	"math"
-	"net/http"
 	"os"
 	"time"
+
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-type Config struct {
-	Rabbit *amqp.Connection
-}
-
 func main() {
-	log.Printf("Starting broker service on port %s\n", common.BrokerPort)
+	log.Printf("Starting listener service...\n")
 
 	// try to connect to rabbitmq
 	rabbitConn, err := connect()
@@ -27,20 +22,19 @@ func main() {
 	defer rabbitConn.Close()
 	log.Println("Connected to RabbitMQ")
 
-	app := Config{
-		Rabbit: rabbitConn,
-	}
+	// start listening for messages
+	log.Println("Listening for and consuming RabbitMQ messages...")
 
-	// define http server
-	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%s", common.BrokerPort),
-		Handler: app.routes(),
-	}
-
-	// start the server
-	err = srv.ListenAndServe()
+	// create consumer
+	consumer, err := event.NewConsumer(rabbitConn)
 	if err != nil {
-		log.Panic(err)
+		panic(err)
+	}
+
+	// watch the queue and consume events
+	err = consumer.Listen([]string{"log.INFO", "log.WARNING", "log.ERROR"})
+	if err != nil {
+		log.Println(err)
 	}
 }
 
@@ -61,7 +55,7 @@ func connect() (*amqp.Connection, error) {
 		}
 
 		if counts > 5 {
-			fmt.Println(err)
+			log.Println(err)
 			return nil, err
 		}
 

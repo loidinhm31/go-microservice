@@ -1,10 +1,8 @@
-module broker
+module listener
 
-go 1.19
+go 1.18
 
 require (
-	github.com/go-chi/chi/v5 v5.0.7
-	github.com/go-chi/cors v1.2.0
 	github.com/loidinhm31/go-micro/common v0.0.0-00010101000000-000000000000
 	github.com/rabbitmq/amqp091-go v1.5.0
 )
