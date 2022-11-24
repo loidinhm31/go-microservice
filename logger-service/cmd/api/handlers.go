@@ -27,6 +27,7 @@ func (app *Config) WriteLog(w http.ResponseWriter, r *http.Request) {
 	err := app.Models.LogEntry.Insert(event)
 	if err != nil {
 		_ = tools.ErrorJSON(w, err)
+		log.Println("Write event error:", err)
 		return
 	}
 
@@ -37,6 +38,6 @@ func (app *Config) WriteLog(w http.ResponseWriter, r *http.Request) {
 
 	err = tools.WriteJSON(w, http.StatusAccepted, response)
 	if err != nil {
-		log.Println(err)
+		log.Println("Write JSON error:", err)
 	}
 }

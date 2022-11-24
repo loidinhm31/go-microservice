@@ -38,25 +38,11 @@ func (app *Config) Authenticate(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("Receive request authenticate from user %s\n", requestPayload.Email)
 
-	// check failure times
-	if failureCount > 3 {
-		mailPayload := MailPayload{
-			From:    "admin@service.com",
-			To:      requestPayload.Email,
-			Subject: "Unusual log in detected",
-			Message: "Your account has been log in unsuccessfully many times.",
-		}
-
-		app.sendMail(w, mailPayload)
-
-		failureCount = 0
-	}
-
 	// validate the user against the database
 	user, err := app.Models.User.GetByEmail(requestPayload.Email)
 	if err != nil {
 		_ = tools.ErrorJSON(w, errors.New("invalid credentials"), http.StatusBadRequest)
-		log.Panic(err)
+		log.Println("Get username error:", err)
 		return
 	}
 
@@ -64,7 +50,26 @@ func (app *Config) Authenticate(w http.ResponseWriter, r *http.Request) {
 	if err != nil || !valid {
 		failureCount++
 		_ = tools.ErrorJSON(w, errors.New("invalid credentials"), http.StatusBadRequest)
-		log.Panic(err)
+		log.Println("Mismatch error:", err)
+
+		// check failure times
+		if failureCount > 3 {
+			log.Printf("Failed %d time(s) from %s\n", failureCount, requestPayload.Email)
+
+			mailPayload := MailPayload{
+				From:    "admin@service.com",
+				To:      requestPayload.Email,
+				Subject: "Unusual log in detected",
+				Message: "Your account has been log in unsuccessfully many times.",
+			}
+
+			err = app.sendMail(w, mailPayload)
+			if err != nil {
+				log.Println("Send email error:", err)
+				return
+			}
+			failureCount = 0
+		}
 		return
 	}
 
@@ -72,7 +77,7 @@ func (app *Config) Authenticate(w http.ResponseWriter, r *http.Request) {
 	err = app.logRequest("authentication", fmt.Sprintf("%s logged in", user.Email))
 	if err != nil {
 		_ = tools.ErrorJSON(w, err)
-		log.Panic(err)
+		log.Println("Logger error:", err)
 		return
 	}
 
@@ -84,7 +89,7 @@ func (app *Config) Authenticate(w http.ResponseWriter, r *http.Request) {
 
 	err = tools.WriteJSON(w, http.StatusAccepted, payload)
 	if err != nil {
-		log.Panic(err)
+		log.Println("Write JSON error:", err)
 	}
 }
 
@@ -113,7 +118,7 @@ func (app *Config) logRequest(name, data string) error {
 	return nil
 }
 
-func (app *Config) sendMail(w http.ResponseWriter, msg MailPayload) {
+func (app *Config) sendMail(w http.ResponseWriter, msg MailPayload) error {
 	jsonData, _ := json.Marshal(msg)
 
 	mailServiceURL := fmt.Sprintf("http://mailer-service:%s/send", common.MailerPort)
@@ -121,26 +126,20 @@ func (app *Config) sendMail(w http.ResponseWriter, msg MailPayload) {
 	// call the mail service
 	request, err := http.NewRequest("POST", mailServiceURL, bytes.NewBuffer(jsonData))
 	if err != nil {
-		_ = tools.ErrorJSON(w, err)
-		log.Panic(err)
-		return
+		return err
 	}
 	request.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
-		_ = tools.ErrorJSON(w, err)
-		log.Panic(err)
-		return
+		return err
 	}
 	defer response.Body.Close()
 
 	// check back status code
 	if response.StatusCode != http.StatusAccepted {
-		_ = tools.ErrorJSON(w, errors.New("error calling mail service"))
-		log.Panic(err)
-		return
+		return errors.New("error calling mail service")
 	}
 
 	// send back json
@@ -151,6 +150,7 @@ func (app *Config) sendMail(w http.ResponseWriter, msg MailPayload) {
 
 	err = tools.WriteJSON(w, http.StatusAccepted, payload)
 	if err != nil {
-		log.Panic(err)
+		return err
 	}
+	return nil
 }

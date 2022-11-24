@@ -88,7 +88,6 @@ func (m *Mail) SendSMTPMessage(msg Message) error {
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 

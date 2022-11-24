@@ -22,6 +22,7 @@ func (app *Config) SendMail(w http.ResponseWriter, r *http.Request) {
 	err := tools.ReadJSON(w, r, &requestPayload)
 	if err != nil {
 		_ = tools.ErrorJSON(w, err)
+		log.Println("Read JSON error:", err)
 		return
 	}
 
@@ -36,6 +37,7 @@ func (app *Config) SendMail(w http.ResponseWriter, r *http.Request) {
 	err = app.Mailer.SendSMTPMessage(msg)
 	if err != nil {
 		_ = tools.ErrorJSON(w, err)
+		log.Println("Send SMTP error:", err)
 		return
 	}
 
@@ -46,7 +48,7 @@ func (app *Config) SendMail(w http.ResponseWriter, r *http.Request) {
 
 	err = tools.WriteJSON(w, http.StatusAccepted, payload)
 	if err != nil {
-		log.Println(err)
+		log.Println("Write JSON error:", err)
 	}
 	log.Printf("Mail has been sent to %s\n", msg.To)
 }

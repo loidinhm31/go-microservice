@@ -1,6 +1,7 @@
 package main
 
 import (
+	"broker/event"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -38,7 +39,7 @@ func (app *Config) Broker(w http.ResponseWriter, r *http.Request) {
 
 	err := tools.WriteJSON(w, http.StatusOK, payload)
 	if err != nil {
-		log.Println(err)
+		log.Println("Response error:", err)
 	}
 }
 
@@ -48,6 +49,7 @@ func (app *Config) HandleSubmission(w http.ResponseWriter, r *http.Request) {
 	err := tools.ReadJSON(w, r, &requestPayload)
 	if err != nil {
 		_ = tools.ErrorJSON(w, err)
+		log.Println("Read JSON error:", err)
 		return
 	}
 
@@ -55,7 +57,7 @@ func (app *Config) HandleSubmission(w http.ResponseWriter, r *http.Request) {
 	case "auth":
 		app.authenticate(w, requestPayload.Auth)
 	case "log":
-		app.logItem(w, requestPayload.Log)
+		app.logEventByRabbit(w, requestPayload.Log)
 	default:
 		_ = tools.ErrorJSON(w, errors.New("unknown action"))
 	}
@@ -69,6 +71,7 @@ func (app *Config) logItem(w http.ResponseWriter, entry LogPayload) {
 	request, err := http.NewRequest("POST", logServiceURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		_ = tools.ErrorJSON(w, err)
+		log.Println("New request:", err)
 		return
 	}
 	request.Header.Set("Content-Type", "application/json")
@@ -78,12 +81,14 @@ func (app *Config) logItem(w http.ResponseWriter, entry LogPayload) {
 	response, err := client.Do(request)
 	if err != nil {
 		_ = tools.ErrorJSON(w, err)
+		log.Println("Client response error:", err)
 		return
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusAccepted {
 		_ = tools.ErrorJSON(w, err)
+		log.Println("Response status error:", err)
 		return
 	}
 
@@ -93,7 +98,7 @@ func (app *Config) logItem(w http.ResponseWriter, entry LogPayload) {
 	}
 	err = tools.WriteJSON(w, http.StatusAccepted, payload)
 	if err != nil {
-		log.Println(err)
+		log.Println("Write JSON error:", err)
 	}
 }
 
@@ -107,6 +112,7 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 	request, err := http.NewRequest("POST", authServiceURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		_ = tools.ErrorJSON(w, err)
+		log.Println("New request error:", err)
 		return
 	}
 
@@ -114,6 +120,7 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 	response, err := client.Do(request)
 	if err != nil {
 		_ = tools.ErrorJSON(w, err)
+		log.Println("Client response error:", err)
 		return
 	}
 	defer response.Body.Close()
@@ -134,6 +141,7 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 	err = json.NewDecoder(response.Body).Decode(&jsonFromService)
 	if err != nil {
 		_ = tools.ErrorJSON(w, err)
+		log.Println("Decode JSON error:", err)
 		return
 	}
 
@@ -150,6 +158,43 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 
 	err = tools.WriteJSON(w, http.StatusAccepted, payload)
 	if err != nil {
-		log.Println(err)
+		log.Println("Write JSON error:", err)
 	}
+}
+
+func (app *Config) logEventByRabbit(w http.ResponseWriter, logPayLoad LogPayload) {
+	err := app.pushToQueue(logPayLoad.Name, logPayLoad.Data)
+	if err != nil {
+		_ = tools.ErrorJSON(w, err)
+		log.Println("Push to queue error:", err)
+		return
+	}
+
+	payload := common.JSONResponse{
+		Error:   false,
+		Message: "logged via RabbitMQ",
+	}
+	err = tools.WriteJSON(w, http.StatusAccepted, payload)
+	if err != nil {
+		log.Println("Write JSON error:", err)
+	}
+}
+
+func (app *Config) pushToQueue(name, message string) error {
+	emitter, err := event.NewEventEmitter(app.Rabbit)
+	if err != nil {
+		return err
+	}
+
+	payload := LogPayload{
+		Name: name,
+		Data: message,
+	}
+
+	j, _ := json.Marshal(&payload)
+	err = emitter.Push(string(j), "log.INFO")
+	if err != nil {
+		return err
+	}
+	return nil
 }
