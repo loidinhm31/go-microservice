@@ -50,6 +50,8 @@ func main() {
 		Models: data.New(client),
 	}
 
+	go app.gRPCListen()
+
 	// define http server
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", common.LoggerPort),

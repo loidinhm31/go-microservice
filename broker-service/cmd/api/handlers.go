@@ -2,13 +2,18 @@ package main
 
 import (
 	"broker/event"
+	"broker/logs"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/loidinhm31/go-micro/common"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"net/http"
+	"time"
 )
 
 type AuthPayload struct {
@@ -197,4 +202,45 @@ func (app *Config) pushToQueue(name, message string) error {
 		return err
 	}
 	return nil
+}
+
+func (app *Config) LogByGRPC(w http.ResponseWriter, r *http.Request) {
+	var requestPayload RequestPayload
+
+	err := tools.ReadJSON(w, r, &requestPayload)
+	if err != nil {
+		_ = tools.ErrorJSON(w, err)
+		return
+	}
+
+	conn, err := grpc.Dial("logger-service:50001", grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
+	if err != nil {
+		_ = tools.ErrorJSON(w, err)
+		return
+	}
+	defer conn.Close()
+
+	c := logs.NewLogServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	_, err = c.WriteLog(ctx, &logs.LogRequest{
+		LogEntry: &logs.Log{
+			Name: requestPayload.Log.Name,
+			Data: requestPayload.Log.Data,
+		},
+	})
+	if err != nil {
+		_ = tools.ErrorJSON(w, err)
+		return
+	}
+
+	payload := common.JSONResponse{
+		Error:   false,
+		Message: "logged",
+	}
+	err = tools.WriteJSON(w, http.StatusAccepted, payload)
+	if err != nil {
+		log.Println(err)
+	}
 }

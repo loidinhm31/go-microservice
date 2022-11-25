@@ -1,6 +1,6 @@
 module mailer-service
 
-go 1.18
+go 1.19
 
 require (
 	github.com/go-chi/chi/v5 v5.0.7
@@ -19,7 +19,5 @@ require (
 	github.com/vanng822/css v1.0.1 // indirect
 	golang.org/x/net v0.0.0-20200904194848-62affa334b73 // indirect
 )
-
-replace example.com/greetings => ../greetings
 
 replace github.com/loidinhm31/go-micro/common => ../common
