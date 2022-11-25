@@ -38,3 +38,14 @@ Change <PATH_TO_PROTO_FILE> to use
 ````sh
 protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative <PATH_TO_PROTO_FILE>
 ````
+
+## Share volumes (file system) among nodes
+Guide
+````
+https://phoenixnap.com/kb/sshfs
+````
+
+Tool
+````
+https://www.gluster.org/
+````
