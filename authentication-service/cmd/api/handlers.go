@@ -39,14 +39,14 @@ func (app *Config) Authenticate(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Receive request authenticate from user %s\n", requestPayload.Email)
 
 	// validate the user against the database
-	user, err := app.Models.User.GetByEmail(requestPayload.Email)
+	user, err := app.Repo.GetByEmail(requestPayload.Email)
 	if err != nil {
 		_ = tools.ErrorJSON(w, errors.New("invalid credentials"), http.StatusBadRequest)
 		log.Println("Get username error:", err)
 		return
 	}
 
-	valid, err := user.PasswordMatches(requestPayload.Password)
+	valid, err := app.Repo.PasswordMatches(requestPayload.Password, *user)
 	if err != nil || !valid {
 		failureCount++
 		_ = tools.ErrorJSON(w, errors.New("invalid credentials"), http.StatusBadRequest)
@@ -110,8 +110,7 @@ func (app *Config) logRequest(name, data string) error {
 		return err
 	}
 
-	client := &http.Client{}
-	_, err = client.Do(request)
+	_, err = app.Client.Do(request)
 	if err != nil {
 		return err
 	}

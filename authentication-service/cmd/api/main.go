@@ -18,8 +18,8 @@ import (
 var counts int64
 
 type Config struct {
-	DB     *sql.DB
-	Models data.Models
+	Repo   data.Repository
+	Client *http.Client
 }
 
 func main() {
@@ -31,10 +31,12 @@ func main() {
 		log.Panic("Cannot connect to database")
 	}
 
+	db := data.NewPostgresRepository(conn)
+
 	// set up config
 	app := Config{
-		DB:     conn,
-		Models: data.New(conn),
+		Client: &http.Client{},
+		Repo:   db,
 	}
 
 	srv := &http.Server{
