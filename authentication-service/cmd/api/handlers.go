@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/loidinhm31/go-micro/common"
+	"github.com/loidinhm31/go-microservice/common"
 	"log"
 	"net/http"
 )

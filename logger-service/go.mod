@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-chi/cors v1.2.1
-	github.com/loidinhm31/go-micro/common v0.0.0-00010101000000-000000000000
+	github.com/loidinhm31/go-microservice/common v0.0.0-00010101000000-000000000000
 	go.mongodb.org/mongo-driver v1.8.4
 	google.golang.org/grpc v1.51.0
 	google.golang.org/protobuf v1.28.1
@@ -29,4 +29,4 @@ require (
 	google.golang.org/genproto v0.0.0-20221118155620-16455021b5e6 // indirect
 )
 
-replace github.com/loidinhm31/go-micro/common => ../common
+replace github.com/loidinhm31/go-microservice/common => ../common

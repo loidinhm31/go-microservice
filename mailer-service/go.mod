@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-chi/cors v1.2.0
-	github.com/loidinhm31/go-micro/common v0.0.0-00010101000000-000000000000
+	github.com/loidinhm31/go-microservice/common v0.0.0-00010101000000-000000000000
 	github.com/vanng822/go-premailer v1.20.1
 	github.com/xhit/go-simple-mail/v2 v2.11.0
 )
@@ -20,4 +20,4 @@ require (
 	golang.org/x/net v0.0.0-20200904194848-62affa334b73 // indirect
 )
 
-replace github.com/loidinhm31/go-micro/common => ../common
+replace github.com/loidinhm31/go-microservice/common => ../common

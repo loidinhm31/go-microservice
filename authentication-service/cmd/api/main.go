@@ -4,7 +4,7 @@ import (
 	"authentication/data"
 	"database/sql"
 	"fmt"
-	"github.com/loidinhm31/go-micro/common"
+	"github.com/loidinhm31/go-microservice/common"
 	"log"
 	"net/http"
 	"os"

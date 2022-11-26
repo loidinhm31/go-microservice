@@ -4,7 +4,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	_ "github.com/loidinhm31/go-micro/common"
+	_ "github.com/loidinhm31/go-microservice/common"
 	"net/http"
 )
 

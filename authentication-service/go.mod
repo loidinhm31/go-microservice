@@ -7,7 +7,7 @@ require (
 	github.com/go-chi/cors v1.2.1
 	github.com/jackc/pgconn v1.13.0
 	github.com/jackc/pgx/v5 v5.1.1
-	github.com/loidinhm31/go-micro/common v0.0.0-00010101000000-000000000000
+	github.com/loidinhm31/go-microservice/common v0.0.0-00010101000000-000000000000
 	golang.org/x/crypto v0.3.0
 )
 
@@ -20,4 +20,4 @@ require (
 	golang.org/x/text v0.4.0 // indirect
 )
 
-replace github.com/loidinhm31/go-micro/common => ../common
+replace github.com/loidinhm31/go-microservice/common => ../common

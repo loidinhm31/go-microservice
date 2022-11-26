@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/loidinhm31/go-micro/common"
+	"github.com/loidinhm31/go-microservice/common"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"log"
 	"math"

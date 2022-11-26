@@ -3,7 +3,7 @@ package main
 import (
 	"embed"
 	"fmt"
-	"github.com/loidinhm31/go-micro/common"
+	"github.com/loidinhm31/go-microservice/common"
 	"html/template"
 	"log"
 	"net/http"

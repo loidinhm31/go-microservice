@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-chi/cors v1.2.0
-	github.com/loidinhm31/go-micro/common v0.0.0-00010101000000-000000000000
+	github.com/loidinhm31/go-microservice/common v0.0.0-00010101000000-000000000000
 	github.com/rabbitmq/amqp091-go v1.5.0
 )
 
@@ -19,4 +19,4 @@ require (
 	google.golang.org/protobuf v1.27.1 // indirect
 )
 
-replace github.com/loidinhm31/go-micro/common => ../common
+replace github.com/loidinhm31/go-microservice/common => ../common
