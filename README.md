@@ -49,3 +49,19 @@ Tool
 ````
 https://www.gluster.org/
 ````
+
+## Kubernetes
+minikube
+````
+https://minikube.sigs.k8s.io/docs/start/
+````
+
+kubernetes
+````
+https://kubernetes.io/docs/tasks/tools/
+````
+
+Configure Ingress TLS/SSL Certificates in Kubernetes
+````
+https://devopscube.com/configure-ingress-tls-kubernetes/
+````
